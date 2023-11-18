@@ -23,7 +23,6 @@ def clean_data(generated, load, save_raw):
         'UnitName': 'first',
         'quantity': 'sum'
     }).reset_index()
-    generated_clean.to_csv("data/test3.csv", index=False)
 
     load['StartTime'] = load['StartTime'].str.rstrip('Z')
     load['EndTime'] = load['EndTime'].str.rstrip('Z')
@@ -37,9 +36,9 @@ def clean_data(generated, load, save_raw):
         'UnitName': 'first',
         'Load': 'sum'
     }).reset_index()
-    load_clean.to_csv("data/test4.csv", index=False)
 
     df = pd.merge(generated_clean, load_clean, on=['HourlyTime', 'Country', 'AreaID'], how='inner', suffixes=('Gen', 'Load'))
+
     return df
 
 def preprocess_data(df):
