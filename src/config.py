@@ -9,6 +9,8 @@ MODEL_NAME = "UNet"
 OPTIMIZER = "Adam"
 CRITERION = "MSELoss"
 
+SAVE_RAW = False
+
 # -----------------------------------------
 
 # Paths -----------------------------------
