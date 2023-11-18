@@ -48,12 +48,23 @@ def preprocess_data(df):
     
     df_pivoted = df.pivot(index='HourlyTime', columns='Country', values=['quantity', 'Load'])
     df_pivoted.columns = ['{}_{}{}'.format(col[0], col[1], '' if len(col) < 3 else col[2]) for col in df_pivoted.columns]
+    new_columns = []
+    print(df_pivoted.columns)
+    for col in df_pivoted.columns:
+        if col == 'HourlyTime':
+            new_columns.append(col)
+        elif 'quantity' in col:
+            new_columns.append('green_energy_{}'.format(col.split("_")[-1]))
+        else:
+            new_columns.append('{}_Load'.format(col))
+
+    df_pivoted.columns = new_columns
 
     return df_pivoted
 
 
 def save_data(df, output_file):
-    df.to_csv(output_file, index=False)
+    df.to_csv(output_file, index=True)
     return
 
 def process_nans(df, column):
