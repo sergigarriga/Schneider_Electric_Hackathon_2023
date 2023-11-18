@@ -1,8 +1,6 @@
 import argparse
 import datetime
 
-import pandas as pd
-
 from logger import get_logger
 from utils import (
     perform_get_request,
@@ -13,22 +11,20 @@ from utils import (
 logger = get_logger()
 
 
-def get_load_data_from_entsoe(regions, periodStart="202201010000", periodEnd="202301010000", output_path="./data"):
-    # TODO: There is a period range limit of 1 year for this API. Process in 1 year chunks if needed
-
+def process_load_chunk(regions, start, end, output_path) -> None:
     # URL of the RESTful API
     url = "https://web-api.tp.entsoe.eu/api"
 
     # General parameters for the API
     # Refer to https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_documenttype
     params = {
-        # "securityToken": "1d9cd4bd-f8aa-476c-8cc1-3442dc91506d",
+        # "securityToken": "1d9cd4bd-f8aa-476c-8cc1-3442dc91506d",  
         "securityToken": "fb81432a-3853-4c30-a105-117c86a433ca",
         "documentType": "A65",
         "processType": "A16",
         "outBiddingZone_Domain": "FILL_IN",  # used for Load data
-        "periodStart": periodStart,  # in the format YYYYMMDDHHMM
-        "periodEnd": periodEnd,  # in the format YYYYMMDDHHMM
+        "periodStart": start,
+        "periodEnd": end,
     }
 
     # Loop through the regions and get data for each region
@@ -45,12 +41,49 @@ def get_load_data_from_entsoe(regions, periodStart="202201010000", periodEnd="20
         # Save the DataFrame to a CSV file
         df.to_csv(f"{output_path}/load_{region}.csv", index=False)
 
-    return
+
+def get_load_data_from_entsoe(regions, periodStart="202201010000", periodEnd="202301010000", output_path="./data"):
+    # Raise exception if periodStart is after periodEnd
+    if periodStart > periodEnd:
+        raise ValueError("periodStart must be before periodEnd")
+
+    # If range is grater than 1 year, process in 1 year chunks
+    if datetime.datetime.strptime(periodEnd, "%Y%m%d%H%M") - datetime.datetime.strptime(
+        periodStart, "%Y%m%d%H%M"
+    ) > datetime.timedelta(days=365):
+        logger.info("Period range is more than 1 year. Processing in 1 year chunks...")
+
+        # Define the initial and final dates for the chunks
+        start_date = datetime.datetime.strptime(periodStart, "%Y%m%d%H%M")
+        end_date = datetime.datetime.strptime(periodEnd, "%Y%m%d%H%M")
+        one_year = datetime.timedelta(days=365)
+
+        while start_date < end_date:
+            # Adjust the chunk end date to avoid exceeding the provided end_date
+            chunk_end_date = min(start_date + one_year, end_date)
+
+            # Get the start and end strings for the API call
+            start_str = start_date.strftime("%Y%m%d%H%M")
+            end_str = chunk_end_date.strftime("%Y%m%d%H%M")
+
+            # Process data for the chunk
+            process_load_chunk(regions, start_str, end_str, output_path)
+
+            # Move to the next chunk
+            start_date += one_year
+
+    else:
+        # Get the start and end strings for the API call
+        start_str = periodStart
+        end_str = periodEnd
+
+        # Process data for the chunk
+        process_load_chunk(regions, start_str, end_str, output_path)
+
+        return
 
 
-def get_gen_data_from_entsoe(regions, periodStart="202302240000", periodEnd="202303240000", output_path="./data"):
-    # TODO: There is a period range limit of 1 day for this API. Process in 1 day chunks if needed
-
+def process_gen_chunk(regions, start, end, output_path) -> None:
     # URL of the RESTful API
     url = "https://web-api.tp.entsoe.eu/api"
 
@@ -61,8 +94,8 @@ def get_gen_data_from_entsoe(regions, periodStart="202302240000", periodEnd="202
         "processType": "A16",
         "outBiddingZone_Domain": "FILL_IN",  # used for Load data
         "in_Domain": "FILL_IN",  # used for Generation data
-        "periodStart": periodStart,  # in the format YYYYMMDDHHMM
-        "periodEnd": periodEnd,  # in the format YYYYMMDDHHMM
+        "periodStart": start,
+        "periodEnd": end,
     }
 
     # Loop through the regions and get data for each region
@@ -81,6 +114,48 @@ def get_gen_data_from_entsoe(regions, periodStart="202302240000", periodEnd="202
         for psr_type, df in dfs.items():
             # Save the DataFrame to a CSV file
             df.to_csv(f"{output_path}/gen_{region}_{psr_type}.csv", index=False)
+
+
+def get_gen_data_from_entsoe(
+    regions, periodStart="202302240000", periodEnd="202303240000", output_path="./data"
+) -> None:
+    # Raise exception if periodStart is after periodEnd
+    if periodStart > periodEnd:
+        raise ValueError("periodStart must be before periodEnd")
+
+    # If range is grater than 1 year, process in 1 year chunks
+    if datetime.datetime.strptime(periodEnd, "%Y%m%d%H%M") - datetime.datetime.strptime(
+        periodStart, "%Y%m%d%H%M"
+    ) > datetime.timedelta(days=365):
+        logger.info("Period range is more than 1 year. Processing in 1 year chunks...")
+
+        # Define the initial and final dates for the chunks
+        start_date = datetime.datetime.strptime(periodStart, "%Y%m%d%H%M")
+        end_date = datetime.datetime.strptime(periodEnd, "%Y%m%d%H%M")
+        one_year = datetime.timedelta(days=365)
+
+        while start_date < end_date:
+            logger.info(f"Fetching data for range {start_date} to {start_date + one_year}")
+
+            # Adjust the chunk end date to avoid exceeding the provided end_date
+            chunk_end_date = min(start_date + one_year, end_date)
+
+            # Get the start and end strings for the API call
+            start_str = start_date.strftime("%Y%m%d%H%M")
+            end_str = chunk_end_date.strftime("%Y%m%d%H%M")
+
+            # Process data for the chunk
+            process_gen_chunk(regions, start_str, end_str, output_path)
+
+            # Move to the next chunk
+            start_date += one_year
+    else:
+        # Get the start and end strings for the API call
+        start_str = periodStart
+        end_str = periodEnd
+
+        # Process data for the chunk
+        process_gen_chunk(regions, start_str, end_str, output_path)
 
     return
 
@@ -132,5 +207,5 @@ if __name__ == "__main__":
     # main(args.start_time, args.end_time, args.output_path)
 
     # Test
-    logger.info("Fetching data from ENTSO-E...")
+    logger.info("Testing - Fetching data from ENTSO-E...")
     main(datetime.datetime(2022, 1, 1), datetime.datetime(2023, 1, 1), "../data")

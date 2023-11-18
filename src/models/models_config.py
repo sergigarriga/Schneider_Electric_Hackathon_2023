@@ -1,0 +1,180 @@
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.ensemble import (
+    AdaBoostClassifier,
+    RandomForestClassifier,
+)
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.gaussian_process.kernels import RBF
+from sklearn.inspection import DecisionBoundaryDisplay
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
+models_config = {
+    "QuadraticDiscriminantAnalysis": {
+        "name": "QuadraticDiscriminantAnalysis",
+        "instance": QuadraticDiscriminantAnalysis(),
+        "type": "sklearn",
+        "params": {
+            "reg_param": 0.0,
+            "store_covariance": False,
+            "tol": 0.0001,
+        },
+    },
+    "AdaBoostClassifier": {
+        "name": "AdaBoostClassifier",
+        "instance": AdaBoostClassifier(),
+        "type": "sklearn",
+        "params": {
+            "algorithm": "SAMME.R",
+            "base_estimator": None,
+            "learning_rate": 1.0,
+            "n_estimators": 50,
+            "random_state": None,
+        },
+    },
+    "RandomForestClassifier": {
+        "name": "RandomForestClassifier",
+        "instance": RandomForestClassifier(),
+        "type": "sklearn",
+        "params": {
+            "bootstrap": True,
+            "ccp_alpha": 0.0,
+            "class_weight": None,
+            "criterion": "gini",
+            "max_depth": None,
+            "max_features": "auto",
+            "max_leaf_nodes": None,
+            "max_samples": None,
+            "min_impurity_decrease": 0.0,
+            "min_impurity_split": None,
+            "min_samples_leaf": 1,
+            "min_samples_split": 2,
+            "min_weight_fraction_leaf": 0.0,
+            "n_estimators": 100,
+            "n_jobs": None,
+            "oob_score": False,
+            "random_state": None,
+            "verbose": 0,
+            "warm_start": False,
+        },
+    },
+    "GaussianProcessClassifier": {
+        "name": "GaussianProcessClassifier",
+        "instance": GaussianProcessClassifier(),
+        "type": "sklearn",
+        "params": {
+            "copy_X_train": True,
+            "kernel": 1.0 * RBF(1.0),
+            "max_iter_predict": 100,
+            "multi_class": "one_vs_rest",
+            "n_jobs": None,
+            "n_restarts_optimizer": 0,
+            "optimizer": "fmin_l_bfgs_b",
+            "random_state": None,
+            "warm_start": False,
+        },
+    },
+    "GaussianNB": {
+        "name": "GaussianNB",
+        "instance": GaussianNB(),
+        "type": "sklearn",
+        "params": {
+            "priors": None,
+            "var_smoothing": 1e-09,
+        },
+    },
+    "KNeighborsClassifier": {
+        "name": "KNeighborsClassifier",
+        "instance": KNeighborsClassifier(),
+        "type": "sklearn",
+        "params": {
+            "algorithm": "auto",
+            "leaf_size": 30,
+            "metric": "minkowski",
+            "metric_params": None,
+            "n_jobs": None,
+            "n_neighbors": 5,
+            "p": 2,
+            "weights": "uniform",
+        },
+    },
+    "MLPClassifier": {
+        "name": "MLPClassifier",
+        "instance": MLPClassifier(),
+        "type": "sklearn",
+        "params": {
+            "activation": "relu",
+            "alpha": 0.0001,
+            "batch_size": "auto",
+            "beta_1": 0.9,
+            "beta_2": 0.999,
+            "early_stopping": False,
+            "epsilon": 1e-08,
+            "hidden_layer_sizes": (100,),
+            "learning_rate": "constant",
+            "learning_rate_init": 0.001,
+            "max_fun": 15000,
+            "max_iter": 200,
+            "momentum": 0.9,
+            "n_iter_no_change": 10,
+            "nesterovs_momentum": True,
+            "power_t": 0.5,
+            "random_state": None,
+            "shuffle": True,
+            "solver": "adam",
+            "tol": 0.0001,
+            "validation_fraction": 0.1,
+            "verbose": False,
+            "warm_start": False,
+        },
+    },
+    "SVC": {
+        "name": "SVC",
+        "instance": SVC(),
+        "type": "sklearn",
+        "params": {
+            "C": 1.0,
+            "break_ties": False,
+            "cache_size": 200,
+            "class_weight": None,
+            "coef0": 0.0,
+            "decision_function_shape": "ovr",
+            "degree": 3,
+            "gamma": "scale",
+            "kernel": "rbf",
+            "max_iter": -1,
+            "probability": False,
+            "random_state": None,
+            "shrinking": True,
+            "tol": 0.001,
+            "verbose": False,
+        },
+    },
+    "DecisionTreeClassifier": {
+        "name": "DecisionTreeClassifier",
+        "instance": DecisionTreeClassifier(),
+        "type": "sklearn",
+        "params": {
+            "ccp_alpha": 0.0,
+            "class_weight": None,
+            "criterion": "gini",
+            "max_depth": None,
+            "max_features": None,
+            "max_leaf_nodes": None,
+            "min_impurity_decrease": 0.0,
+            "min_impurity_split": None,
+            "min_samples_leaf": 1,
+            "min_samples_split": 2,
+            "min_weight_fraction_leaf": 0.0,
+            "presort": "deprecated",
+            "random_state": None,
+            "splitter": "best",
+        },
+    },
+}

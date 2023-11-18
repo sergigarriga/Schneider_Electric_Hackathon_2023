@@ -1,7 +1,7 @@
 import logging
 import os
-from datetime import datetime
 import sys
+from datetime import datetime
 
 from config import (
     EXECUTION_NAME,
@@ -43,6 +43,9 @@ def initialize_logger(
 
 def get_logger():
     return logger
+
+
+initialize_logger()
 
 
 if __name__ == "__main__":

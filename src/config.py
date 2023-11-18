@@ -26,3 +26,4 @@ LEARNING_RATE = 1e-3
 WEIGHT_DECAY = 1e-5
 MOMENTUM = 0.9
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+RANDOM_SEED = 42
