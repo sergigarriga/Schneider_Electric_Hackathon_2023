@@ -2,7 +2,7 @@ import argparse
 import os
 import pandas as pd
 
-MAPPED_KEYS = ["DE", "DK", "HU", "IT", "NE", "PO", "SE", "SP", "UK"]
+MAPPED_KEYS = {"DE":"DE", "DK":"DK", "HU":"HU", "IT":"IT", "NE":"NL", "PO":"PO", "SE":"SE", "SP":"SP", "UK":"UK", "NL":"NL"}
 
 def load_data(file_path):
     df = pd.read_csv(file_path)
@@ -19,7 +19,7 @@ def clean_data(generated, load, save_raw):
     # Redondear las fechas a la hora más cercana
     generated['HourlyTime'] = generated['StartTime'].dt.round('H')
 
-    generated_clean = generated.groupby(['HourlyTime', 'Country', 'AreaID']).agg({
+    generated_clean = generated.groupby(['HourlyTime', 'Country']).agg({
         'UnitName': 'first',
         'quantity': 'sum'
     }).reset_index()
@@ -32,19 +32,24 @@ def clean_data(generated, load, save_raw):
 
     load['HourlyTime'] = load['StartTime'].dt.round('H')
 
-    load_clean = load.groupby(['HourlyTime', 'Country', 'AreaID']).agg({
+    load_clean = load.groupby(['HourlyTime', 'Country']).agg({
         'UnitName': 'first',
         'Load': 'sum'
     }).reset_index()
 
-    df = pd.merge(generated_clean, load_clean, on=['HourlyTime', 'Country', 'AreaID'], how='inner', suffixes=('Gen', 'Load'))
+    df = pd.merge(generated_clean, load_clean, on=['HourlyTime', 'Country'], how='inner', suffixes=('Gen', 'Load'))
 
     return df
+
 
 def preprocess_data(df):
     # TODO: Generate new features, transform existing features, resampling, etc.
-    return df
-    return df_processed
+    df = df.drop(columns=['UnitNameGen', 'UnitNameLoad'])
+    
+    df_pivoted = df.pivot(index='HourlyTime', columns='Country', values=['quantity', 'Load'])
+    df_pivoted.columns = ['{}_{}{}'.format(col[0], col[1], '' if len(col) < 3 else col[2]) for col in df_pivoted.columns]
+
+    return df_pivoted
 
 
 def save_data(df, output_file):
@@ -70,22 +75,22 @@ def unify_data(data_path):
                 df = load_data(file_path=file_path)
                 df =process_nans(df, column="quantity")
                 country = file.split("_")[1]
-                generated[country].append(df)
+                generated[MAPPED_KEYS[country]].append(df)
             elif "load" in file_path:
                 df = load_data(file_path=file_path)
                 df = process_nans(df, column="Load")
                 load[country] = df
     
-    
+
     generated_data = []
     for country in generated.keys():
-        df = pd.concat(generated[country], ignore_index=True)
-        df['Country'] = country
+        df = pd.concat(generated[MAPPED_KEYS[country]], ignore_index=True)
+        df['Country'] = MAPPED_KEYS[country]
         generated_data.append(df)
     generated_data = pd.concat(generated_data, ignore_index=True)
 
     for country in load.keys():
-        load[country]['Country'] = country
+        load[country]['Country'] = MAPPED_KEYS[country]
     _load_data = pd.concat(load.values(), ignore_index=True)
 
     return generated_data, _load_data
@@ -120,9 +125,9 @@ def parse_arguments():
 def main(input_file, output_file, data_folder, save_raw=True):
     generated, load = unify_data(data_path=data_folder)
     df = clean_data(generated, load, save_raw=save_raw)
-    df_processed = preprocess_data(df)
+    df = preprocess_data(df)
     if save_raw:
-        save_data(df_processed, output_file)
+        save_data(df, output_file)
 
 if __name__ == "__main__":
     args = parse_arguments()
