@@ -43,7 +43,7 @@ def clean_data(generated, load, save_raw):
 
 def preprocess_data(df):
     # TODO: Generate new features, transform existing features, resampling, etc.
-    return
+    return df
     return df_processed
 
 
