@@ -18,7 +18,7 @@ def process_load_chunk(regions, start, end, output_path) -> None:
     # General parameters for the API
     # Refer to https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_documenttype
     params = {
-        # "securityToken": "1d9cd4bd-f8aa-476c-8cc1-3442dc91506d",  
+        # "securityToken": "1d9cd4bd-f8aa-476c-8cc1-3442dc91506d",
         "securityToken": "fb81432a-3853-4c30-a105-117c86a433ca",
         "documentType": "A65",
         "processType": "A16",
@@ -203,6 +203,8 @@ def main(start_time, end_time, output_path):
 
 
 if __name__ == "__main__":
+    logger.info("-" * 50)
+    logger.info("Starting data ingestion...")
     # args = parse_arguments()
     # main(args.start_time, args.end_time, args.output_path)
 

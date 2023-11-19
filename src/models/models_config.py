@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-models_config = {
+models = {
     "QuadraticDiscriminantAnalysis": {
         "name": "QuadraticDiscriminantAnalysis",
         "instance": QuadraticDiscriminantAnalysis(),

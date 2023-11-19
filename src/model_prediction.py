@@ -65,6 +65,8 @@ def main(input_file, model_file, output_file):
 
 
 if __name__ == "__main__":
+    logger.info("-" * 50)
+    logger.info("Starting model evaluation...")
     args = parse_arguments()
     # main(args.input_file, args.model_file, args.output_file)
 
